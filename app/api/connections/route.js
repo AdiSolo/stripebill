@@ -20,37 +20,64 @@ export async function GET(request) {
 
 // 2️⃣ ADAUGĂ conexiune nouă
 export async function POST(request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.redirect(new URL('/auth/signin', request.url));
-  }
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.redirect(new URL('/auth/signin', request.url));
+    }
 
-  // Extragem câmpurile din body
-  const { name, stripeApiKey, smartbillEmail, smartbillToken, smartbillCIF } = await request.json();
+    // Extragem câmpurile din body
+    let requestBody;
+    try {
+      requestBody = await request.json();
+    } catch (error) {
+      console.error('Error parsing request body:', error);
+      return NextResponse.json(
+        { error: 'Invalid request body. Please check your input.' },
+        { status: 400 }
+      );
+    }
 
-  // Verificăm limita de conexiuni în funcție de plan
-  const existingCount = await prisma.connection.count({
-    where: { userId: session.user.id },
-  });
-  const limit = session.user.plan === 'PRO' ? 3 : 1;
-  if (existingCount >= limit) {
+    const { name, stripeApiKey, smartbillEmail, smartbillToken, smartbillCIF } = requestBody;
+
+    // Validate required fields
+    if (!name || !stripeApiKey || !smartbillEmail || !smartbillToken || !smartbillCIF) {
+      return NextResponse.json(
+        { error: 'All fields are required.' },
+        { status: 400 }
+      );
+    }
+
+    // Verificăm limita de conexiuni în funcție de plan
+    const existingCount = await prisma.connection.count({
+      where: { userId: session.user.id },
+    });
+    const limit = session.user.plan === 'PRO' ? 3 : 1;
+    if (existingCount >= limit) {
+      return NextResponse.json(
+        { error: 'Upgrade plan to add more connections.' },
+        { status: 400 }
+      );
+    }
+
+    // Creăm conexiunea în DB
+    const connection = await prisma.connection.create({
+      data: {
+        name,
+        stripeApiKey,
+        smartbillEmail,
+        smartbillToken,
+        smartbillCIF,
+        userId: session.user.id,
+      },
+    });
+
+    return NextResponse.json(connection, { status: 201 });
+  } catch (error) {
+    console.error('Error creating connection:', error);
     return NextResponse.json(
-      { error: 'Upgrade plan to add more connections.' },
-      { status: 400 }
+      { error: 'Failed to create connection. Please try again.' },
+      { status: 500 }
     );
   }
-
-  // Creăm conexiunea în DB
-  const connection = await prisma.connection.create({
-    data: {
-      name,
-      stripeApiKey,
-      smartbillEmail,
-      smartbillToken,
-      smartbillCIF,
-      userId: session.user.id,
-    },
-  });
-
-  return NextResponse.json(connection, { status: 201 });
 }

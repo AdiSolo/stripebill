@@ -60,6 +60,7 @@ model InvoiceLink {
   smartbillId   String     @unique
   status        String
   connectionId  String
+  downloadUrl   String?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
