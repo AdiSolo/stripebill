@@ -1,19 +1,39 @@
-// middleware.js
-import { withAuth } from "next-auth/middleware";
+import { NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-export default withAuth({
-  callbacks: {
-    authorized({ req, token }) {
-      // Permitem acces oricărei rute care începe cu /api/auth (login, register, NextAuth)
-      if (req.nextUrl.pathname.startsWith("/api/auth")) return true;
-      // Permitem acces pentru paginile publice:
-      if (req.nextUrl.pathname.startsWith("/auth")) return true;
-      if (req.nextUrl.pathname === "/") return true;
-      // Toate celelalte rute necesită token (user logat)
-      return !!token;
-    },
-  },
-});
+export async function middleware(request) {
+  const token = await getToken({ 
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET
+  });
 
-// Specificăm pentru ce rute se aplică middleware-ul:
-export const config = { matcher: ["/api/:path*", "/auth/:path*", "/connections/:path*", "/dashboard/:path*"] };
+  // Allow access to public routes
+  if (
+    request.nextUrl.pathname === '/' || 
+    request.nextUrl.pathname.startsWith('/auth') ||
+    request.nextUrl.pathname.startsWith('/api/auth')
+  ) {
+    return NextResponse.next();
+  }
+
+  // Redirect to login if not authenticated and trying to access a protected route
+  if (!token) {
+    const url = new URL('/auth/signin', request.url);
+    url.searchParams.set('callbackUrl', request.nextUrl.pathname);
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
+};

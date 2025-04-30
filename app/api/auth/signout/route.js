@@ -1,5 +1,4 @@
-"use client"
-import { getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth";
 import { authOptions } from "../[...nextauth]/route";
 
 export async function POST(request) {

@@ -1,7 +1,12 @@
+'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { SignOutButton } from './components/signout/singnOutButton';
+import { SignOutButton } from './components/signout';
+import { useSession } from 'next-auth/react';
+
 export default function Home() {
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === 'authenticated';
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -14,19 +19,32 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center">
-              <Link
-                href="/auth/signin"
-                className="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/auth/register"
-                className="ml-4 px-4 py-2 rounded-md text-sm font-medium text-blue-600 border border-blue-600 hover:bg-blue-50"
-              >
-                Register
-              </Link>
-              <SignOutButton />
+              {!isAuthenticated ? (
+                <>
+                  <Link
+                    href="/auth/signin"
+                    className="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    className="ml-4 px-4 py-2 rounded-md text-sm font-medium text-blue-600 border border-blue-600 hover:bg-blue-50"
+                  >
+                    Register
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/connections"
+                    className="px-4 py-2 rounded-md text-sm font-medium text-blue-600 hover:text-blue-700"
+                  >
+                    My Connections
+                  </Link>
+                  <SignOutButton className="ml-4 px-4 py-2 rounded-md text-sm font-medium text-red-600 border border-red-600 hover:bg-red-50" />
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -43,10 +61,10 @@ export default function Home() {
           </p>
           <div className="mt-8 space-x-4">
             <Link
-              href="/auth/register"
+              href={isAuthenticated ? "/connections" : "/auth/register"}
               className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
-              Get Started
+              {isAuthenticated ? "Go to Dashboard" : "Get Started"}
             </Link>
             <Link
               href="#features"
