@@ -1,46 +1,38 @@
-// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-enum SubscriptionPlan {
-  BASIC
-  PRO
-}
-
 model User {
-  id           String            @id @default(uuid())
-  email        String            @unique
+  id           String           @id @default(uuid())
+  email        String           @unique
   passwordHash String
-  plan         SubscriptionPlan  @default(BASIC)
-  createdAt    DateTime          @default(now())
+  plan         SubscriptionPlan @default(BASIC)
+  createdAt    DateTime         @default(now())
   connections  Connection[]
 }
+
 model Connection {
-  id                  String         @id @default(uuid())
-  name                String         // user-friendly label
+  id                  String        @id @default(uuid())
   stripeApiKey        String
+  userId              String
+  createdAt           DateTime      @default(now())
+  name                String
+  smartbillCIF        String
   smartbillEmail      String
   smartbillToken      String
-  smartbillCIF        String
-  stripeWebhookId     String?        // will store the webhook endpoint id
-  stripeWebhookSecret String?        // will store the webhook signing secret
-  userId              String
-  createdAt           DateTime       @default(now())
-
-  user            User           @relation(fields: [userId], references: [id])
-  payments        Payment[]      // relație spre plăți
-  invoiceLinks    InvoiceLink[]  // relație spre facturi
+  stripeWebhookId     String?
+  stripeWebhookSecret String?
+  user                User          @relation(fields: [userId], references: [id])
+  invoiceLinks        InvoiceLink[]
+  payments            Payment[]
 
   @@unique([userId, id])
 }
-
 
 model Payment {
   id           String     @id @default(uuid())
@@ -50,21 +42,18 @@ model Payment {
   status       String
   connectionId String
   createdAt    DateTime   @default(now())
-
   connection   Connection @relation(fields: [connectionId], references: [id])
 }
 
 model InvoiceLink {
-  id            String     @id @default(uuid())
-  paymentId     String     @unique
-  smartbillId   String     @unique
-  status        String
-  connectionId  String
-  downloadUrl   String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-
-  connection    Connection @relation(fields: [connectionId], references: [id])
+  id           String     @id @default(uuid())
+  paymentId    String     @unique
+  smartbillId  String     @unique
+  status       String
+  connectionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  connection   Connection @relation(fields: [connectionId], references: [id])
 }
 
 model AuditLog {
@@ -72,4 +61,9 @@ model AuditLog {
   eventType String
   payload   Json
   createdAt DateTime @default(now())
+}
+
+enum SubscriptionPlan {
+  BASIC
+  PRO
 }

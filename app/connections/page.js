@@ -8,6 +8,7 @@ import Link from 'next/link';
 
 export default function ConnectionsPage() {
   const { data: session, status } = useSession({ required: true });
+  console.log('Session is', session)
   const router = useRouter();
   const [connections, setConnections] = useState([]);
   const [form, setForm] = useState({

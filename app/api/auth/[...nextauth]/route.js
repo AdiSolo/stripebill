@@ -46,12 +46,14 @@ export const authOptions = {
     async jwt({ token, user }) {
       // La prima autentificare, user conține date din DB
       if (user) {
+        token.id = user.id;
         token.plan = user.plan;
       }
       return token;
     },
     async session({ session, token }) {
-      // Injectăm plan-ul din token în sesiune
+      // Injectăm user ID și plan din token în sesiune
+      session.user.id = token.id;
       session.user.plan = token.plan;
       return session;
     },

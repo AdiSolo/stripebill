@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-
+import { SignOutButton } from './components/signout/singnOutButton';
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -26,6 +26,7 @@ export default function Home() {
               >
                 Register
               </Link>
+              <SignOutButton />
             </div>
           </div>
         </div>

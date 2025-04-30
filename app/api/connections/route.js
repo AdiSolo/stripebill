@@ -68,7 +68,11 @@ export async function POST(request) {
         smartbillEmail,
         smartbillToken,
         smartbillCIF,
-        userId: session.user.id,
+        user: {
+          connect: {
+            id: session.user.id
+          }
+        }
       },
     });
 
