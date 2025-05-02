@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
-import prisma from '../../../../../lib/prisma'; // adaptează calea dacă nu foloseşti alias
+import prisma from '../../../../lib/prisma'; // adaptează calea dacă nu foloseşti alias
 
 // 1️⃣ UPDATE conexiune
 export async function PATCH(request, { params }) {

@@ -1,11 +1,13 @@
 // workers/invoice-processor.js
-import { Worker } from 'bullmq';
-import Redis from 'ioredis';
-import { createSmartBillInvoice } from '../lib/smartbill';
-import prisma from '../lib/prisma';
+const { Worker } = require('bullmq');
+const Redis = require('ioredis');
+const { createSmartBillInvoice } = require('../lib/smartbill');
+const prisma = require('../lib/prisma');
 
 // Set up Redis connection
-const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+  maxRetriesPerRequest: null
+});
 
 // Initialize worker
 const worker = new Worker('invoice-processing', async (job) => {
@@ -101,4 +103,4 @@ process.on('SIGINT', async () => {
 });
 
 // Export worker for external use
-export default worker;
+module.exports = worker;

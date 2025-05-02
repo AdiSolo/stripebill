@@ -1,13 +1,13 @@
-// app/connections/[id]/webhook/route.js
+// app/api/connections/[id]/webhook/route.js
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../api/auth/[...nextauth]/route';
+import { authOptions } from '../../../auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 import { setupConnectionWebhook, deleteConnectionWebhook } from '@/lib/stripe';
 
 // Set up webhook for connection
 export async function POST(request, { params }) {
-  console.log('Webhook setup request received for connection ID:', params.id);
+  console.log('API Webhook setup request received for connection ID:', params.id);
   
   try {
     const session = await getServerSession(authOptions);

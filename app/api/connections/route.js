@@ -8,6 +8,7 @@ import prisma from '@/lib/prisma';
 // 1️⃣ LISTARE conexiuni
 export async function GET(request) {
   const session = await getServerSession(authOptions);
+
   if (!session) {
     return NextResponse.redirect(new URL('/auth/signin', request.url));
   }

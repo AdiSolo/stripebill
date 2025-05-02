@@ -35,14 +35,15 @@ model Connection {
 }
 
 model Payment {
-  id           String     @id @default(uuid())
-  stripeId     String     @unique
+  id           String       @id @default(uuid())
+  stripeId     String       @unique
   amount       Int
   currency     String
   status       String
   connectionId String
-  createdAt    DateTime   @default(now())
-  connection   Connection @relation(fields: [connectionId], references: [id])
+  createdAt    DateTime     @default(now())
+  connection   Connection   @relation(fields: [connectionId], references: [id])
+  invoiceLink  InvoiceLink?
 }
 
 model InvoiceLink {
@@ -51,9 +52,11 @@ model InvoiceLink {
   smartbillId  String     @unique
   status       String
   connectionId String
+  downloadUrl  String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   connection   Connection @relation(fields: [connectionId], references: [id])
+  payment      Payment    @relation(fields: [paymentId], references: [id])
 }
 
 model AuditLog {
